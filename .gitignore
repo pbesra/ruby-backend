@@ -1,0 +1,63 @@
+## Ignore Visual Studio temporary files, build results, and user-specific files
+
+# Build artifacts
+bin/
+obj/
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# Local app settings and secret files
+appsettings.Local.json
+appsettings.*.Local.json
+secrets.json
+.env
+.env.*
+
+# NuGet
+# Ignore package folders and generated packages
+packages/
+.nuget/packages/
+*.nupkg
+
+# Publish outputs
+publish/
+*.Publish.xml
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Database files
+*.mdf
+*.ldf
+*.sqlite
+
+# Docker compose local overrides
+docker-compose.override.yml
+
+# Node
+node_modules/
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Tools
+.dotnet/tools/

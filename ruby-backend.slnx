@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ruby.api/ruby.api.csproj" />
+  <Project Path="ruby.domain/ruby.domain.csproj" />
+  <Project Path="ruby.infrastructure/ruby.infrastructure.csproj" />
+  <Project Path="ruby.services/ruby.application.csproj" />
+</Solution>

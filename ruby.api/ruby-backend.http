@@ -1,0 +1,6 @@
+@ruby_backend_HostAddress = http://localhost:5217
+
+GET {{ruby_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
