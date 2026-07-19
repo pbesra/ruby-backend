@@ -6,4 +6,19 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Mappers\" />
+    <Folder Include="Ports\In\IServices\" />
+    <Folder Include="Ports\In\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ruby.domain\ruby.domain.csproj" />
+  </ItemGroup>
+
 </Project>

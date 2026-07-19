@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ruby_backend.Controllers.v1
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("v1/api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
