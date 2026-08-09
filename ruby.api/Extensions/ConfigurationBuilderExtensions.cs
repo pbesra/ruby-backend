@@ -1,4 +1,4 @@
-﻿namespace ruby_backend.Extensions
+﻿namespace ruby.backend.Extensions
 {
     public static class ConfigurationBuilderExtensions
     {

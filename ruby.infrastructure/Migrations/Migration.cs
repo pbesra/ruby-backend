@@ -1,4 +1,5 @@
-﻿using ruby.infrastructure.Interfaces;
+﻿using EvolveDb;
+using ruby.infrastructure.Interfaces;
 using System.Data;
 using System.Data.Common;
 
@@ -18,6 +19,14 @@ namespace ruby.infrastructure.Migrations
                 };
                 evolve.Migrate();
                 return true;
+            }
+            catch (EvolveSqlException ex)
+            {
+                throw new Exception(ex?.Message);
+            }
+            catch (EvolveException ex)
+            {
+                throw new Exception(ex?.Message);
             }
             catch (Exception ex)
             {

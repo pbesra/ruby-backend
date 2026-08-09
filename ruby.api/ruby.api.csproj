@@ -7,6 +7,13 @@
     <RootNamespace>ruby_backend</RootNamespace>
   </PropertyGroup>
 
+  <Target Name="StopRunningRubyApiBeforeBuild"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(OS)' == 'Windows_NT' and '$(DesignTimeBuild)' != 'true'">
+    <Message Text="Checking for a running ruby.api.exe instance that would lock build outputs." Importance="high" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\stop-ruby-api-lock.ps1&quot; -TargetExePath &quot;$(TargetDir)ruby.api.exe&quot;" />
+  </Target>
+
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="Evolve" Version="3.2.0" />
@@ -16,7 +23,11 @@
   <ItemGroup>
     <ProjectReference Include="..\ruby.domain\ruby.domain.csproj" />
     <ProjectReference Include="..\ruby.infrastructure\ruby.infrastructure.csproj" />
-    <ProjectReference Include="..\ruby.services\ruby.application.csproj" />
+    <ProjectReference Include="..\ruby.application\ruby.application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\v1\Requests\" />
   </ItemGroup>
 
 </Project>

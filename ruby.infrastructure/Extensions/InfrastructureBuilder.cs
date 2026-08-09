@@ -1,10 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ruby.domain.Constants;
+using ruby.domain.ModelConfig;
 using ruby.infrastructure.Configurations;
 using ruby.infrastructure.Interfaces;
 using ruby.infrastructure.Migrations;
-using ruby.infrastructure.Providers;
+using ruby.infrastructure.Persistence.IRepositories;
+using ruby.infrastructure.Persistence.Repositories;
 using System.Data;
 
 namespace ruby.infrastructure.Extensions
@@ -13,19 +14,27 @@ namespace ruby.infrastructure.Extensions
     {
         public static IServiceCollection AddPersistenceBuilderServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<IMigration, Migration>();
+            services.Configure<PGDatabaseConfig>(configuration.GetSection("DatabaseConnection"));
+            services.AddSingleton<IDatabaseConfiguration, PGDatabaseConfiguration>();
+            services.AddScoped<ISQLDatabase, PGSQLDatabase>();
+            services.AddScoped<IMigration, Migration>();
             services.AddSingleton<IRootConfiguration, RootConfiguration>();
-            services.AddSingleton<IDatabaseProvider>(sp =>
-            {
-                return new DatabaseProvider(configuration.GetSection("DatabaseProvider")["Provider"], configuration.GetConnectionString(DBConstant.ConnectionStringName));
-            });
+            services.AddSingleton<IDatabaseConfig, PGDatabaseConfig>();
+
+            // persistence repositories
+            services.AddScoped<ruby.application.Ports.Out.Persistence.IRepositories.IUserRepository, ruby.infrastructure.Persistence.Repositories.UserRepository>();
+            services.AddScoped<ruby.application.Ports.Out.Persistence.IRepositories.IRefreshTokenRepository, ruby.infrastructure.Persistence.Repositories.RefreshTokenRepository>();
+            services.AddScoped<ruby.application.Ports.Out.Persistence.IRepositories.IProfileRepository, ruby.infrastructure.Persistence.Repositories.ProfileRepository>();
+            services.AddScoped<ruby.application.Ports.Out.Persistence.IRepositories.IProfileRatingRepository, ruby.infrastructure.Persistence.Repositories.ProfileRatingRepository>();
+            services.AddScoped<ruby.application.Ports.Out.Persistence.IRepositories.IHomeFeedRepository, ruby.infrastructure.Persistence.Repositories.HomeFeedRepository>();
+
             return services;
         }
 
-        private static IDbConnection GetAuthDBConnection(IServiceProvider serviceProvider)
+        private static Task<IDbConnection> GetDBConnection(IServiceProvider serviceProvider)
         {
-            var rootConfiguration = serviceProvider.GetRequiredService<IDatabaseProvider>();
-            return rootConfiguration.GetDatabaseProvider();
+            var databaseProvider = serviceProvider.GetRequiredService<ISQLDatabase>();
+            return databaseProvider.GetConnection();
         }
 
         public static async Task<bool> UseMigrationScope(this IServiceScope scope)
@@ -35,7 +44,7 @@ namespace ruby.infrastructure.Extensions
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
             var migrationService = serviceProvider.GetRequiredService<IMigration>();
             var migrationPath = configuration.GetSection("RootConfiguration")["MigrationPath"];
-            var dbConnection = GetAuthDBConnection(serviceProvider);
+            using var dbConnection = await GetDBConnection(serviceProvider);
             if (await rootConfiguration.ValidMigrationConfigurationPath(configuration))
             {
                 return await migrationService.RunMigration(dbConnection, migrationPath);

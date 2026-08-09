@@ -1,0 +1,122 @@
+{
+  "info": {
+    "name": "Ruby Backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for Ruby backend authentication flows, including device login support."
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"firstName\": \"{{firstName}}\",\n  \"lastName\": \"{{lastName}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/authentication/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "authentication", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"user@example.com\",\n  \"password\": \"Password123!\",\n  \"deviceId\": \"device-12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/authentication/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "authentication", "login"]
+            }
+          }
+        },
+        {
+          "name": "Request Phone Login Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"+15555550123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/authentication/login/phone/request-code",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "authentication", "login", "phone", "request-code"]
+            }
+          }
+        },
+        {
+          "name": "Phone Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"+15555550123\",\n  \"code\": \"123456\",\n  \"deviceId\": \"device-12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/authentication/login/phone",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "authentication", "login", "phone"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\",\n  \"deviceId\": \"device-12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/authentication/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "authentication", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/authentication/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "authentication", "logout"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

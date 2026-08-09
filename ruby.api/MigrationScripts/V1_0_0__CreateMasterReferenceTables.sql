@@ -7,307 +7,307 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE OR REPLACE FUNCTION public.update_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW."UpdatedAt" = now();
+  NEW.updatedat = now();
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Users
-CREATE TABLE IF NOT EXISTS public."Users" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "UserName" varchar(100) NOT NULL,
-  "Email" varchar(255) NOT NULL,
-  "PhoneNumber" varchar(50),
-  "PasswordHash" text NOT NULL,
-  "Status" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid,
-  "LastLoginAt" timestamptz
+CREATE TABLE IF NOT EXISTS public.Users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  username varchar(100) NOT NULL,
+  email varchar(255) NOT NULL,
+  phonenumber varchar(50),
+  passwordhash text NOT NULL,
+  status smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid,
+  lastloginat timestamptz
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_users_username ON public."Users" (lower("UserName"));
-CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email ON public."Users" (lower("Email"));
-CREATE INDEX IF NOT EXISTS ix_users_status ON public."Users" ("Status");
-CREATE INDEX IF NOT EXISTS ix_users_updatedby ON public."Users" ("UpdatedBy");
+CREATE UNIQUE INDEX IF NOT EXISTS ux_users_username ON public.Users (lower(username));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email ON public.Users (lower(email));
+CREATE INDEX IF NOT EXISTS ix_users_status ON public.Users (status);
+CREATE INDEX IF NOT EXISTS ix_users_updatedby ON public.Users (updatedby);
 
 -- Common pattern: Id (uuid), Name, Description, IsActive, SortOrder, CreatedAt, UpdatedAt, UpdatedBy
 
 -- UserStatuses
-CREATE TABLE IF NOT EXISTS public."UserStatuses" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(50) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.userstatuses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(50) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_userstatuses_name ON public."UserStatuses" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_userstatuses_name ON public.userstatuses (lower(name));
 
 -- MessageTypes
-CREATE TABLE IF NOT EXISTS public."MessageTypes" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(50) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.messagetypes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(50) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_messagetypes_name ON public."MessageTypes" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_messagetypes_name ON public.messagetypes (lower(name));
 
 -- MessageStatuses
-CREATE TABLE IF NOT EXISTS public."MessageStatuses" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(50) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.messagestatuses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(50) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_messagestatuses_name ON public."MessageStatuses" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_messagestatuses_name ON public.messagestatuses (lower(name));
 
 -- CallStatuses
-CREATE TABLE IF NOT EXISTS public."CallStatuses" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(50) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.callstatuses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(50) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_callstatuses_name ON public."CallStatuses" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_callstatuses_name ON public.callstatuses (lower(name));
 
 -- PaymentStatuses
-CREATE TABLE IF NOT EXISTS public."PaymentStatuses" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(50) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.paymentstatuses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(50) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_paymentstatuses_name ON public."PaymentStatuses" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_paymentstatuses_name ON public.paymentstatuses (lower(name));
 
 -- WalletTransactionTypes
-CREATE TABLE IF NOT EXISTS public."WalletTransactionTypes" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(100) NOT NULL,
-  "Description" varchar(200),
-  "Direction" varchar(20),
-  "AffectsBalance" boolean NOT NULL DEFAULT true,
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.wallettransactiontypes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(100) NOT NULL,
+  description varchar(200),
+  direction varchar(20),
+  affectsbalance boolean NOT NULL DEFAULT true,
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_wallettransactiontypes_name ON public."WalletTransactionTypes" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_wallettransactiontypes_name ON public.wallettransactiontypes (lower(name));
 
 -- Genders
-CREATE TABLE IF NOT EXISTS public."Genders" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(50) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.genders (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(50) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_genders_name ON public."Genders" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_genders_name ON public.genders (lower(name));
 
 -- UserRoles
-CREATE TABLE IF NOT EXISTS public."UserRoles" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(50) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.userroles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(50) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_userroles_name ON public."UserRoles" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_userroles_name ON public.userroles (lower(name));
 
 -- NotificationTypes
-CREATE TABLE IF NOT EXISTS public."NotificationTypes" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(100) NOT NULL,
-  "Description" varchar(200),
-  "RequiresPushNotification" boolean NOT NULL DEFAULT false,
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.notificationtypes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(100) NOT NULL,
+  description varchar(200),
+  requirespushnotification boolean NOT NULL DEFAULT false,
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_notificationtypes_name ON public."NotificationTypes" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_notificationtypes_name ON public.notificationtypes (lower(name));
 
 -- CallTypes
-CREATE TABLE IF NOT EXISTS public."CallTypes" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(50) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.calltypes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(50) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_calltypes_name ON public."CallTypes" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_calltypes_name ON public.calltypes (lower(name));
 
 -- Countries
-CREATE TABLE IF NOT EXISTS public."Countries" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(150) NOT NULL,
-  "IsoCode" varchar(10),
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.countries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(150) NOT NULL,
+  isocode varchar(10),
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_countries_name ON public."Countries" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_countries_name ON public.countries (lower(name));
 
 -- Languages
-CREATE TABLE IF NOT EXISTS public."Languages" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(100) NOT NULL,
-  "IsoCode" varchar(10),
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.languages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(100) NOT NULL,
+  isocode varchar(10),
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_languages_name ON public."Languages" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_languages_name ON public.languages (lower(name));
 
 -- GiftCategories
-CREATE TABLE IF NOT EXISTS public."GiftCategories" (
-  "Id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "Name" varchar(150) NOT NULL,
-  "Description" varchar(200),
-  "IsActive" boolean NOT NULL DEFAULT true,
-  "SortOrder" smallint NOT NULL DEFAULT 0,
-  "CreatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedAt" timestamptz NOT NULL DEFAULT now(),
-  "UpdatedBy" uuid
+CREATE TABLE IF NOT EXISTS public.giftcategories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(150) NOT NULL,
+  description varchar(200),
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder smallint NOT NULL DEFAULT 0,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_giftcategories_name ON public."GiftCategories" (lower("Name"));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_giftcategories_name ON public.giftcategories (lower(name));
 
 -- Add UpdatedBy foreign keys referencing Users(Id)
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_userstatuses_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."UserStatuses" ADD CONSTRAINT fk_userstatuses_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.userstatuses ADD CONSTRAINT fk_userstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_messagetypes_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."MessageTypes" ADD CONSTRAINT fk_messagetypes_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.messagetypes ADD CONSTRAINT fk_messagetypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_messagestatuses_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."MessageStatuses" ADD CONSTRAINT fk_messagestatuses_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.messagestatuses ADD CONSTRAINT fk_messagestatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_callstatuses_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."CallStatuses" ADD CONSTRAINT fk_callstatuses_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.callstatuses ADD CONSTRAINT fk_callstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_paymentstatuses_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."PaymentStatuses" ADD CONSTRAINT fk_paymentstatuses_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.paymentstatuses ADD CONSTRAINT fk_paymentstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_wallettransactiontypes_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."WalletTransactionTypes" ADD CONSTRAINT fk_wallettransactiontypes_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.wallettransactiontypes ADD CONSTRAINT fk_wallettransactiontypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_genders_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."Genders" ADD CONSTRAINT fk_genders_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.genders ADD CONSTRAINT fk_genders_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_userroles_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."UserRoles" ADD CONSTRAINT fk_userroles_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.userroles ADD CONSTRAINT fk_userroles_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_notificationtypes_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."NotificationTypes" ADD CONSTRAINT fk_notificationtypes_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.notificationtypes ADD CONSTRAINT fk_notificationtypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_calltypes_updatedby') THEN
-	EXECUTE 'ALTER TABLE public."CallTypes" ADD CONSTRAINT fk_calltypes_updatedby FOREIGN KEY ("UpdatedBy") REFERENCES public."Users"("Id") ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.calltypes ADD CONSTRAINT fk_calltypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
   END IF;
 END;
 $$;
 
 -- Attach update triggers to all master tables
-DROP TRIGGER IF EXISTS trg_userstatuses_update_timestamp ON public."UserStatuses";
+DROP TRIGGER IF EXISTS trg_userstatuses_update_timestamp ON public.userstatuses;
 CREATE TRIGGER trg_userstatuses_update_timestamp
-BEFORE UPDATE ON public."UserStatuses"
+BEFORE UPDATE ON public.userstatuses
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_messagetypes_update_timestamp ON public."MessageTypes";
+DROP TRIGGER IF EXISTS trg_messagetypes_update_timestamp ON public.messagetypes;
 CREATE TRIGGER trg_messagetypes_update_timestamp
-BEFORE UPDATE ON public."MessageTypes"
+BEFORE UPDATE ON public.messagetypes
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_messagestatuses_update_timestamp ON public."MessageStatuses";
+DROP TRIGGER IF EXISTS trg_messagestatuses_update_timestamp ON public.messagestatuses;
 CREATE TRIGGER trg_messagestatuses_update_timestamp
-BEFORE UPDATE ON public."MessageStatuses"
+BEFORE UPDATE ON public.messagestatuses
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_callstatuses_update_timestamp ON public."CallStatuses";
+DROP TRIGGER IF EXISTS trg_callstatuses_update_timestamp ON public.callstatuses;
 CREATE TRIGGER trg_callstatuses_update_timestamp
-BEFORE UPDATE ON public."CallStatuses"
+BEFORE UPDATE ON public.callstatuses
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_paymentstatuses_update_timestamp ON public."PaymentStatuses";
+DROP TRIGGER IF EXISTS trg_paymentstatuses_update_timestamp ON public.paymentstatuses;
 CREATE TRIGGER trg_paymentstatuses_update_timestamp
-BEFORE UPDATE ON public."PaymentStatuses"
+BEFORE UPDATE ON public.paymentstatuses
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_wallettransactiontypes_update_timestamp ON public."WalletTransactionTypes";
+DROP TRIGGER IF EXISTS trg_wallettransactiontypes_update_timestamp ON public.wallettransactiontypes;
 CREATE TRIGGER trg_wallettransactiontypes_update_timestamp
-BEFORE UPDATE ON public."WalletTransactionTypes"
+BEFORE UPDATE ON public.wallettransactiontypes
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_genders_update_timestamp ON public."Genders";
+DROP TRIGGER IF EXISTS trg_genders_update_timestamp ON public.genders;
 CREATE TRIGGER trg_genders_update_timestamp
-BEFORE UPDATE ON public."Genders"
+BEFORE UPDATE ON public.genders
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_userroles_update_timestamp ON public."UserRoles";
+DROP TRIGGER IF EXISTS trg_userroles_update_timestamp ON public.userroles;
 CREATE TRIGGER trg_userroles_update_timestamp
-BEFORE UPDATE ON public."UserRoles"
+BEFORE UPDATE ON public.userroles
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_notificationtypes_update_timestamp ON public."NotificationTypes";
+DROP TRIGGER IF EXISTS trg_notificationtypes_update_timestamp ON public.notificationtypes;
 CREATE TRIGGER trg_notificationtypes_update_timestamp
-BEFORE UPDATE ON public."NotificationTypes"
+BEFORE UPDATE ON public.notificationtypes
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 
-DROP TRIGGER IF EXISTS trg_calltypes_update_timestamp ON public."CallTypes";
+DROP TRIGGER IF EXISTS trg_calltypes_update_timestamp ON public.calltypes;
 CREATE TRIGGER trg_calltypes_update_timestamp
-BEFORE UPDATE ON public."CallTypes"
+BEFORE UPDATE ON public.calltypes
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();

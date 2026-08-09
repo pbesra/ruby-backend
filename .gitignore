@@ -52,6 +52,9 @@ Thumbs.db
 # Docker compose local overrides
 docker-compose.override.yml
 
+# Instructions folder
+instructions/
+
 # Node
 node_modules/
 
