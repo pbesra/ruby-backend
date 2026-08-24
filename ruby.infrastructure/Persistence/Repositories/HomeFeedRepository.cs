@@ -25,23 +25,60 @@ namespace ruby.infrastructure.Persistence.Repositories
                                 NULLIF(trim(concat_ws(' ', p.firstname, p.lastname)), ''),
                                 u.username
                             ) AS Name,
-                            UPPER(COALESCE(NULLIF(c.isocode, ''), 'IN')) AS CountryCode,
+                            UPPER(COALESCE(NULLIF(a.countrycode, ''), 'IN')) AS CountryCode,
                             CASE
                                 WHEN p.dob IS NULL THEN NULL
                                 ELSE date_part('year', age(current_date, p.dob))::int
                             END AS Age,
-                            CASE WHEN COALESCE(u.status, 0) = 1 THEN true ELSE false END AS IsOnline,
+                            COALESCE(
+                                lower(s.name),
+                                CASE u.status
+                                    WHEN 1 THEN 'online'
+                                    WHEN 2 THEN 'live'
+                                    WHEN 3 THEN 'busy'
+                                    WHEN 4 THEN 'party'
+                                    WHEN 0 THEN 'offline'
+                                    ELSE 'away'
+                                END
+                            ) AS Status,
+                            CASE
+                                WHEN lower(COALESCE(s.name,
+                                    CASE u.status
+                                        WHEN 1 THEN 'online'
+                                        WHEN 2 THEN 'live'
+                                        WHEN 3 THEN 'busy'
+                                        WHEN 4 THEN 'party'
+                                        WHEN 0 THEN 'offline'
+                                        ELSE 'away'
+                                    END)) = 'online' THEN true
+                                ELSE false
+                            END AS IsOnline,
                             p.avatarurl AS AvatarUrl,
-                            CASE WHEN f.userid IS NULL THEN false ELSE true END AS IsFollowing
-                        FROM public.users u
+                            CASE WHEN rel.userid IS NOT NULL THEN true ELSE false END AS IsFollowing
+                        FROM public.useraccount u
                         LEFT JOIN public.profiles p ON p.userid = u.id
-                        LEFT JOIN public.countries c ON c.id = p.country
-                        LEFT JOIN public.followings f
-                            ON f.userid = @CurrentUserId
-                           AND f.followinguserid = u.id
+                        LEFT JOIN public.status s ON s.id = p.statusid
+                        LEFT JOIN public.addresses a ON a.id = p.addressid
+                        LEFT JOIN (
+                            SELECT DISTINCT userid, followinguserid
+                            FROM public.followings
+                            UNION
+                            SELECT DISTINCT followeruserid AS userid, followinguserid
+                            FROM public.followers
+                        ) rel
+                            ON rel.userid = @CurrentUserId
+                           AND rel.followinguserid = u.id
                         WHERE u.id <> @CurrentUserId
                         ORDER BY
-                            CASE WHEN COALESCE(u.status, 0) = 1 THEN 0 ELSE 1 END,
+                            CASE WHEN lower(COALESCE(s.name,
+                                CASE u.status
+                                    WHEN 1 THEN 'online'
+                                    WHEN 2 THEN 'live'
+                                    WHEN 3 THEN 'busy'
+                                    WHEN 4 THEN 'party'
+                                    WHEN 0 THEN 'offline'
+                                    ELSE 'away'
+                                END)) = 'online' THEN 0 ELSE 1 END,
                             COALESCE(NULLIF(p.displayname, ''), u.username);";
 
             return await conn.QueryAsync<UserPreviewResponse>(sql, new { CurrentUserId = currentUserId });
@@ -58,21 +95,58 @@ namespace ruby.infrastructure.Persistence.Repositories
                                 NULLIF(trim(concat_ws(' ', p.firstname, p.lastname)), ''),
                                 u.username
                             ) AS Name,
-                            UPPER(COALESCE(NULLIF(c.isocode, ''), 'IN')) AS CountryCode,
+                            UPPER(COALESCE(NULLIF(a.countrycode, ''), 'IN')) AS CountryCode,
                             CASE
                                 WHEN p.dob IS NULL THEN NULL
                                 ELSE date_part('year', age(current_date, p.dob))::int
                             END AS Age,
-                            CASE WHEN COALESCE(u.status, 0) = 1 THEN true ELSE false END AS IsOnline,
+                            COALESCE(
+                                lower(s.name),
+                                CASE u.status
+                                    WHEN 1 THEN 'online'
+                                    WHEN 2 THEN 'live'
+                                    WHEN 3 THEN 'busy'
+                                    WHEN 4 THEN 'party'
+                                    WHEN 0 THEN 'offline'
+                                    ELSE 'away'
+                                END
+                            ) AS Status,
+                            CASE
+                                WHEN lower(COALESCE(s.name,
+                                    CASE u.status
+                                        WHEN 1 THEN 'online'
+                                        WHEN 2 THEN 'live'
+                                        WHEN 3 THEN 'busy'
+                                        WHEN 4 THEN 'party'
+                                        WHEN 0 THEN 'offline'
+                                        ELSE 'away'
+                                    END)) = 'online' THEN true
+                                ELSE false
+                            END AS IsOnline,
                             p.avatarurl AS AvatarUrl,
                             true AS IsFollowing
-                        FROM public.followings f
-                        JOIN public.users u ON u.id = f.followinguserid
+                        FROM (
+                            SELECT DISTINCT userid, followinguserid
+                            FROM public.followings
+                            UNION
+                            SELECT DISTINCT followeruserid AS userid, followinguserid
+                            FROM public.followers
+                        ) rel
+                        JOIN public.useraccount u ON u.id = rel.followinguserid
                         LEFT JOIN public.profiles p ON p.userid = u.id
-                        LEFT JOIN public.countries c ON c.id = p.country
-                        WHERE f.userid = @CurrentUserId
+                        LEFT JOIN public.status s ON s.id = p.statusid
+                        LEFT JOIN public.addresses a ON a.id = p.addressid
+                        WHERE rel.userid = @CurrentUserId
                         ORDER BY
-                            CASE WHEN COALESCE(u.status, 0) = 1 THEN 0 ELSE 1 END,
+                            CASE WHEN lower(COALESCE(s.name,
+                                CASE u.status
+                                    WHEN 1 THEN 'online'
+                                    WHEN 2 THEN 'live'
+                                    WHEN 3 THEN 'busy'
+                                    WHEN 4 THEN 'party'
+                                    WHEN 0 THEN 'offline'
+                                    ELSE 'away'
+                                END)) = 'online' THEN 0 ELSE 1 END,
                             COALESCE(NULLIF(p.displayname, ''), u.username);";
 
             return await conn.QueryAsync<UserPreviewResponse>(sql, new { CurrentUserId = currentUserId });

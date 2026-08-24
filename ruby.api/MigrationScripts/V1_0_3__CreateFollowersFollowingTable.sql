@@ -23,15 +23,15 @@ CREATE INDEX IF NOT EXISTS ix_followers_followinguserid
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_followers_follower_user') THEN
-    EXECUTE 'ALTER TABLE public.followers ADD CONSTRAINT fk_followers_follower_user FOREIGN KEY (followeruserid) REFERENCES public.users(id) ON DELETE CASCADE';
+    EXECUTE 'ALTER TABLE public.followers ADD CONSTRAINT fk_followers_follower_user FOREIGN KEY (followeruserid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_followers_following_user') THEN
-    EXECUTE 'ALTER TABLE public.followers ADD CONSTRAINT fk_followers_following_user FOREIGN KEY (followinguserid) REFERENCES public.users(id) ON DELETE CASCADE';
+    EXECUTE 'ALTER TABLE public.followers ADD CONSTRAINT fk_followers_following_user FOREIGN KEY (followinguserid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_followers_updatedby_user') THEN
-    EXECUTE 'ALTER TABLE public.followers ADD CONSTRAINT fk_followers_updatedby_user FOREIGN KEY (updatedby) REFERENCES public.users(id) ON DELETE SET NULL';
+    EXECUTE 'ALTER TABLE public.followers ADD CONSTRAINT fk_followers_updatedby_user FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 END;
 $$;
@@ -64,15 +64,15 @@ CREATE INDEX IF NOT EXISTS ix_followings_followinguserid
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_followings_user') THEN
-    EXECUTE 'ALTER TABLE public.followings ADD CONSTRAINT fk_followings_user FOREIGN KEY (userid) REFERENCES public.users(id) ON DELETE CASCADE';
+    EXECUTE 'ALTER TABLE public.followings ADD CONSTRAINT fk_followings_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_followings_following_user') THEN
-    EXECUTE 'ALTER TABLE public.followings ADD CONSTRAINT fk_followings_following_user FOREIGN KEY (followinguserid) REFERENCES public.users(id) ON DELETE CASCADE';
+    EXECUTE 'ALTER TABLE public.followings ADD CONSTRAINT fk_followings_following_user FOREIGN KEY (followinguserid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_followings_updatedby_user') THEN
-    EXECUTE 'ALTER TABLE public.followings ADD CONSTRAINT fk_followings_updatedby_user FOREIGN KEY (updatedby) REFERENCES public.users(id) ON DELETE SET NULL';
+    EXECUTE 'ALTER TABLE public.followings ADD CONSTRAINT fk_followings_updatedby_user FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 END;
 $$;
@@ -91,12 +91,12 @@ EXECUTE FUNCTION public.update_timestamp();
 
 WITH device_users AS (
   SELECT id
-  FROM public.users
+  FROM public.useraccount
   WHERE lower(username) LIKE 'device:%'
 ),
 seed_targets AS (
   SELECT id
-  FROM public.users
+  FROM public.useraccount
   WHERE lower(username) IN (
     'alex.hayes01', 'jamie.reed02', 'taylor.quinn03',
     'morgan.ellis04', 'riley.carter05', 'casey.blake06',
@@ -122,12 +122,12 @@ ON CONFLICT (followeruserid, followinguserid) DO NOTHING;
 
 WITH device_users AS (
   SELECT id
-  FROM public.users
+  FROM public.useraccount
   WHERE lower(username) LIKE 'device:%'
 ),
 seed_sources AS (
   SELECT id
-  FROM public.users
+  FROM public.useraccount
   WHERE lower(username) IN (
     'mason.rivera25', 'ella.cooper26', 'aiden.ross27',
     'chloe.ward28', 'leo.hunter29', 'grace.morgan30',
@@ -164,12 +164,12 @@ ON CONFLICT (userid, followinguserid) DO NOTHING;
 -- Additional explicit followings for device users.
 WITH device_users AS (
   SELECT id
-  FROM public.users
+  FROM public.useraccount
   WHERE lower(username) LIKE 'device:%'
 ),
 target_users AS (
   SELECT id
-  FROM public.users
+  FROM public.useraccount
   WHERE lower(username) IN (
     'alex.hayes01', 'jamie.reed02', 'morgan.ellis04',
     'casey.blake06', 'mika.brooks08', 'jordan.flynn10'

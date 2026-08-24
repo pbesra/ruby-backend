@@ -73,7 +73,7 @@ WITH fake_users AS (
 		('00000000-0000-0000-0000-000000000020', 'stella.ramsey32','stella.ramsey32@ruby.local','Stella', 'Ramsey',  0)
 	) AS t(id, username, email, firstname, lastname, status)
 )
-INSERT INTO public.users (id, username, email, passwordhash, status, createdat, updatedat, lastloginat)
+INSERT INTO public.useraccount (id, username, email, passwordhash, status, createdat, updatedat, lastloginat)
 SELECT
 	fu.id::uuid,
 	fu.username,
@@ -87,7 +87,7 @@ SELECT
 FROM fake_users fu
 WHERE NOT EXISTS (
 	SELECT 1
-	FROM public.users u
+	FROM public.useraccount u
 	WHERE lower(u.username) = lower(fu.username)
 		 OR lower(u.email) = lower(fu.email)
 );
@@ -131,7 +131,7 @@ WITH fake_users AS (
 		('stella.ramsey32','stella.ramsey32@ruby.local',0)
 	) AS t(username, email, status)
 )
-UPDATE public.users u
+UPDATE public.useraccount u
 SET
 	status = fu.status,
 	updatedat = now()
@@ -189,7 +189,7 @@ SELECT
 	now(),
 	now()
 FROM fake_profiles fp
-JOIN public.users u ON u.id = fp.userid::uuid
+JOIN public.useraccount u ON u.id = fp.userid::uuid
 ON CONFLICT (userid) DO UPDATE
 SET
 	firstname = EXCLUDED.firstname,

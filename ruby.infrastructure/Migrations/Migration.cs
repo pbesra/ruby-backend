@@ -9,13 +9,18 @@ namespace ruby.infrastructure.Migrations
     {
         public async Task<bool> RunMigration(IDbConnection connection, string migrationPath)
         {
+            if (string.IsNullOrWhiteSpace(migrationPath))
+            {
+                throw new ArgumentException("Migration path cannot be null or empty.");
+            }
+
             try
             {
                 var evolve = new EvolveDb.Evolve((DbConnection)connection)
                 {
                     Locations = new[] { migrationPath },
                     IsEraseDisabled = true,
-                    CommandTimeout = 300
+                    CommandTimeout = 500
                 };
                 evolve.Migrate();
                 return true;
@@ -30,7 +35,6 @@ namespace ruby.infrastructure.Migrations
             }
             catch (Exception ex)
             {
-                //throw new CustomEvolveException(migrationPath, ex);
                 throw new Exception(ex?.Message);
             }
         }

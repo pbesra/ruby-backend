@@ -3,16 +3,26 @@ using ruby.infrastructure.Interfaces;
 
 namespace ruby.infrastructure.Configurations
 {
-    public class RootConfiguration:IRootConfiguration
+    public class RootConfiguration : IRootConfiguration
     {
         public async Task<bool> ValidMigrationConfigurationPath(IConfiguration configuration)
         {
             var path = configuration.GetSection("RootConfiguration")["MigrationPath"];
-            var directory = new DirectoryInfo(path);
-            if (directory.Exists && directory.GetFiles().Length > 0)
+            var migrationPath = string.IsNullOrWhiteSpace(path) ? "MigrationScripts" : path;
+
+            try
             {
-                return true;
+                var directory = new DirectoryInfo(migrationPath);
+                if (directory.Exists && directory.GetFiles().Length > 0)
+                {
+                    return true;
+                }
             }
+            catch
+            {
+                return false;
+            }
+
             return false;
         }
     }

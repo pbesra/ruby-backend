@@ -13,7 +13,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Users
-CREATE TABLE IF NOT EXISTS public.Users (
+CREATE TABLE IF NOT EXISTS public.useraccount (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   username varchar(100) NOT NULL,
   email varchar(255) NOT NULL,
@@ -25,10 +25,26 @@ CREATE TABLE IF NOT EXISTS public.Users (
   updatedby uuid,
   lastloginat timestamptz
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_users_username ON public.Users (lower(username));
-CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email ON public.Users (lower(email));
-CREATE INDEX IF NOT EXISTS ix_users_status ON public.Users (status);
-CREATE INDEX IF NOT EXISTS ix_users_updatedby ON public.Users (updatedby);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_users_username ON public.useraccount (lower(username));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_users_email ON public.useraccount (lower(email));
+CREATE INDEX IF NOT EXISTS ix_users_status ON public.useraccount (status);
+CREATE INDEX IF NOT EXISTS ix_users_updatedby ON public.useraccount (updatedby);
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'users'
+  )
+  AND NOT EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'useraccount'
+  ) THEN
+    ALTER TABLE public.users RENAME TO useraccount;
+  END IF;
+END $$;
 
 -- Common pattern: Id (uuid), Name, Description, IsActive, SortOrder, CreatedAt, UpdatedAt, UpdatedBy
 
@@ -51,12 +67,14 @@ CREATE TABLE IF NOT EXISTS public.messagetypes (
   name varchar(50) NOT NULL,
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_messagetypes_name ON public.messagetypes (lower(name));
+CREATE INDEX IF NOT EXISTS ix_messagetypes_iscache ON public.messagetypes (iscache);
 
 -- MessageStatuses
 CREATE TABLE IF NOT EXISTS public.messagestatuses (
@@ -64,12 +82,14 @@ CREATE TABLE IF NOT EXISTS public.messagestatuses (
   name varchar(50) NOT NULL,
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_messagestatuses_name ON public.messagestatuses (lower(name));
+CREATE INDEX IF NOT EXISTS ix_messagestatuses_iscache ON public.messagestatuses (iscache);
 
 -- CallStatuses
 CREATE TABLE IF NOT EXISTS public.callstatuses (
@@ -77,12 +97,14 @@ CREATE TABLE IF NOT EXISTS public.callstatuses (
   name varchar(50) NOT NULL,
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_callstatuses_name ON public.callstatuses (lower(name));
+CREATE INDEX IF NOT EXISTS ix_callstatuses_iscache ON public.callstatuses (iscache);
 
 -- PaymentStatuses
 CREATE TABLE IF NOT EXISTS public.paymentstatuses (
@@ -90,12 +112,14 @@ CREATE TABLE IF NOT EXISTS public.paymentstatuses (
   name varchar(50) NOT NULL,
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_paymentstatuses_name ON public.paymentstatuses (lower(name));
+CREATE INDEX IF NOT EXISTS ix_paymentstatuses_iscache ON public.paymentstatuses (iscache);
 
 -- WalletTransactionTypes
 CREATE TABLE IF NOT EXISTS public.wallettransactiontypes (
@@ -105,12 +129,14 @@ CREATE TABLE IF NOT EXISTS public.wallettransactiontypes (
   direction varchar(20),
   affectsbalance boolean NOT NULL DEFAULT true,
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_wallettransactiontypes_name ON public.wallettransactiontypes (lower(name));
+CREATE INDEX IF NOT EXISTS ix_wallettransactiontypes_iscache ON public.wallettransactiontypes (iscache);
 
 -- Genders
 CREATE TABLE IF NOT EXISTS public.genders (
@@ -118,12 +144,14 @@ CREATE TABLE IF NOT EXISTS public.genders (
   name varchar(50) NOT NULL,
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_genders_name ON public.genders (lower(name));
+CREATE INDEX IF NOT EXISTS ix_genders_iscache ON public.genders (iscache);
 
 -- UserRoles
 CREATE TABLE IF NOT EXISTS public.userroles (
@@ -131,12 +159,14 @@ CREATE TABLE IF NOT EXISTS public.userroles (
   name varchar(50) NOT NULL,
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_userroles_name ON public.userroles (lower(name));
+CREATE INDEX IF NOT EXISTS ix_userroles_iscache ON public.userroles (iscache);
 
 -- NotificationTypes
 CREATE TABLE IF NOT EXISTS public.notificationtypes (
@@ -172,12 +202,14 @@ CREATE TABLE IF NOT EXISTS public.countries (
   isocode varchar(10),
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_countries_name ON public.countries (lower(name));
+CREATE INDEX IF NOT EXISTS ix_countries_iscache ON public.countries (iscache);
 
 -- Languages
 CREATE TABLE IF NOT EXISTS public.languages (
@@ -186,12 +218,50 @@ CREATE TABLE IF NOT EXISTS public.languages (
   isocode varchar(10),
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_languages_name ON public.languages (lower(name));
+CREATE INDEX IF NOT EXISTS ix_languages_iscache ON public.languages (iscache);
+
+-- ChipCategories
+CREATE TABLE IF NOT EXISTS public.chipcategories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name varchar(150) NOT NULL,
+  code varchar(50) NOT NULL,
+  isactive boolean NOT NULL DEFAULT true,
+  sortorder integer NOT NULL DEFAULT 0
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_chipcategories_name ON public.chipcategories (lower(name));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_chipcategories_code ON public.chipcategories (lower(code));
+
+-- Chips
+CREATE TABLE IF NOT EXISTS public.chips (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  chipcategoryid uuid NOT NULL,
+  name varchar(150) NOT NULL,
+  code varchar(50) NOT NULL,
+  avatarurl text,
+  description varchar(500),
+  sortorder integer NOT NULL DEFAULT 0,
+  isactive boolean NOT NULL DEFAULT true,
+  createdat timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_chips_name ON public.chips (lower(name));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_chips_code ON public.chips (lower(code));
+CREATE INDEX IF NOT EXISTS ix_chips_chipcategoryid ON public.chips (chipcategoryid);
+CREATE INDEX IF NOT EXISTS ix_chips_isactive ON public.chips (isactive);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_chips_chipcategory') THEN
+    EXECUTE 'ALTER TABLE public.chips ADD CONSTRAINT fk_chips_chipcategory FOREIGN KEY (chipcategoryid) REFERENCES public.chipcategories(id) ON DELETE CASCADE';
+  END IF;
+END;
+$$;
 
 -- GiftCategories
 CREATE TABLE IF NOT EXISTS public.giftcategories (
@@ -199,54 +269,56 @@ CREATE TABLE IF NOT EXISTS public.giftcategories (
   name varchar(150) NOT NULL,
   description varchar(200),
   isactive boolean NOT NULL DEFAULT true,
+  iscache boolean NOT NULL DEFAULT true,
   sortorder smallint NOT NULL DEFAULT 0,
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_giftcategories_name ON public.giftcategories (lower(name));
+CREATE INDEX IF NOT EXISTS ix_giftcategories_iscache ON public.giftcategories (iscache);
 
--- Add UpdatedBy foreign keys referencing Users(Id)
+-- Add UpdatedBy foreign keys referencing useraccount(Id)
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_userstatuses_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.userstatuses ADD CONSTRAINT fk_userstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.userstatuses ADD CONSTRAINT fk_userstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_messagetypes_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.messagetypes ADD CONSTRAINT fk_messagetypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.messagetypes ADD CONSTRAINT fk_messagetypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_messagestatuses_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.messagestatuses ADD CONSTRAINT fk_messagestatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.messagestatuses ADD CONSTRAINT fk_messagestatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_callstatuses_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.callstatuses ADD CONSTRAINT fk_callstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.callstatuses ADD CONSTRAINT fk_callstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_paymentstatuses_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.paymentstatuses ADD CONSTRAINT fk_paymentstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.paymentstatuses ADD CONSTRAINT fk_paymentstatuses_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_wallettransactiontypes_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.wallettransactiontypes ADD CONSTRAINT fk_wallettransactiontypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.wallettransactiontypes ADD CONSTRAINT fk_wallettransactiontypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_genders_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.genders ADD CONSTRAINT fk_genders_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.genders ADD CONSTRAINT fk_genders_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_userroles_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.userroles ADD CONSTRAINT fk_userroles_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.userroles ADD CONSTRAINT fk_userroles_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_notificationtypes_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.notificationtypes ADD CONSTRAINT fk_notificationtypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.notificationtypes ADD CONSTRAINT fk_notificationtypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_calltypes_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.calltypes ADD CONSTRAINT fk_calltypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.calltypes ADD CONSTRAINT fk_calltypes_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 END;
 $$;

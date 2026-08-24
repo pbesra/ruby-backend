@@ -15,11 +15,13 @@ namespace ruby.infrastructure.Extensions
         public static IServiceCollection AddPersistenceBuilderServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<PGDatabaseConfig>(configuration.GetSection("DatabaseConnection"));
+            services.AddMemoryCache();
             services.AddSingleton<IDatabaseConfiguration, PGDatabaseConfiguration>();
             services.AddScoped<ISQLDatabase, PGSQLDatabase>();
             services.AddScoped<IMigration, Migration>();
             services.AddSingleton<IRootConfiguration, RootConfiguration>();
             services.AddSingleton<IDatabaseConfig, PGDatabaseConfig>();
+            services.AddSingleton<ruby.infrastructure.Services.IReferenceCacheService, ruby.infrastructure.Services.ReferenceCacheService>();
 
             // persistence repositories
             services.AddScoped<ruby.application.Ports.Out.Persistence.IRepositories.IUserRepository, ruby.infrastructure.Persistence.Repositories.UserRepository>();
@@ -44,12 +46,14 @@ namespace ruby.infrastructure.Extensions
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
             var migrationService = serviceProvider.GetRequiredService<IMigration>();
             var migrationPath = configuration.GetSection("RootConfiguration")["MigrationPath"];
-            using var dbConnection = await GetDBConnection(serviceProvider);
-            if (await rootConfiguration.ValidMigrationConfigurationPath(configuration))
+
+            if (string.IsNullOrWhiteSpace(migrationPath) || !await rootConfiguration.ValidMigrationConfigurationPath(configuration))
             {
-                return await migrationService.RunMigration(dbConnection, migrationPath);
+                return false;
             }
-            return false;
+
+            using var dbConnection = await GetDBConnection(serviceProvider);
+            return await migrationService.RunMigration(dbConnection, migrationPath);
         }
     }
 }

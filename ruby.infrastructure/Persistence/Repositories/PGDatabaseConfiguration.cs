@@ -13,13 +13,22 @@ namespace ruby.infrastructure.Persistence.Repositories
 
         public PGDatabaseConfiguration(IOptions<PGDatabaseConfig> options, IConfiguration configuration)
         {
-            _config = options.Value;
+            _config = options.Value ?? new PGDatabaseConfig();
             _configuration = configuration;
         }
 
         public IDatabaseConfig GetDatabaseConfig()
         {
-            if (string.IsNullOrWhiteSpace(_config.Host) || _config.Port <= 0)
+            var section = _configuration.GetSection("DatabaseConnection");
+            var sectionConfig = section.Get<PGDatabaseConfig>() ?? new PGDatabaseConfig();
+
+            _config.Host = string.IsNullOrWhiteSpace(_config.Host) ? sectionConfig.Host : _config.Host;
+            _config.Database = string.IsNullOrWhiteSpace(_config.Database) ? sectionConfig.Database : _config.Database;
+            _config.Username = string.IsNullOrWhiteSpace(_config.Username) ? sectionConfig.Username : _config.Username;
+            _config.Password = string.IsNullOrWhiteSpace(_config.Password) ? sectionConfig.Password : _config.Password;
+            _config.Port = _config.Port <= 0 ? sectionConfig.Port : _config.Port;
+
+            if (string.IsNullOrWhiteSpace(_config.Host) || string.IsNullOrWhiteSpace(_config.Database) || string.IsNullOrWhiteSpace(_config.Username))
             {
                 var connectionString = _configuration.GetConnectionString("DefaultConnection");
                 if (!string.IsNullOrWhiteSpace(connectionString))
@@ -33,10 +42,11 @@ namespace ruby.infrastructure.Persistence.Repositories
                 }
             }
 
-            if (_config.Port <= 0)
-            {
-                _config.Port = 5432;
-            }
+            _config.Host = string.IsNullOrWhiteSpace(_config.Host) ? "localhost" : _config.Host;
+            _config.Database = string.IsNullOrWhiteSpace(_config.Database) ? "ruby" : _config.Database;
+            _config.Username = string.IsNullOrWhiteSpace(_config.Username) ? "postgres" : _config.Username;
+            _config.Password = string.IsNullOrWhiteSpace(_config.Password) ? "root" : _config.Password;
+            _config.Port = _config.Port <= 0 ? 5432 : _config.Port;
 
             return _config;
         }

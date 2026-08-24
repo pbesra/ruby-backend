@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="ruby.api/ruby.api.csproj" />
+  <Project Path="ruby.application/ruby.application.csproj" />
   <Project Path="ruby.domain/ruby.domain.csproj" />
   <Project Path="ruby.infrastructure/ruby.infrastructure.csproj" />
-  <Project Path="ruby.application/ruby.application.csproj" />
+  <Project Path="ruby.tests/ruby.tests.csproj" Id="1c7dde3c-4549-4d75-9980-4b599f04532f" />
 </Solution>
