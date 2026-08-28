@@ -53,7 +53,7 @@ jobs:
         run: dotnet build $PROJECT_PATH -c Release --no-restore
 
       - name: Run tests
-        run: dotnet test $TEST_PROJECT_PATH -c Release --no-build --logger trx
+        run: dotnet test $TEST_PROJECT_PATH -c Release --logger trx
 
       - name: Publish backend
         run: dotnet publish $PROJECT_PATH -c Release -o $PUBLISH_DIR --no-restore
