@@ -1,0 +1,101 @@
+name: Deploy Backend to EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DOTNET_VERSION: '8.0.x'
+      PROJECT_PATH: './ruby.api/ruby.api.csproj'
+      PUBLISH_DIR: './publish'
+      ARTIFACT_NAME: 'ruby-backend-release.tar.gz'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore packages
+        run: dotnet restore $PROJECT_PATH
+
+      - name: Publish backend
+        run: dotnet publish $PROJECT_PATH -c Release -o $PUBLISH_DIR --no-restore
+
+      - name: Package release
+        run: tar -czf $ARTIFACT_NAME -C $PUBLISH_DIR .
+
+      - name: Upload package to EC2
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: ${{ env.ARTIFACT_NAME }}
+          target: /tmp/
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: EC2_DEPLOY_PATH,ASPNETCORE_ENVIRONMENT,DB_HOST,DB_NAME,DB_USER,DB_PASSWORD,JWT_KEY,JWT_ISSUER,JWT_AUDIENCE
+          script: |
+            set -e
+            export EC2_DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH }}"
+            export ASPNETCORE_ENVIRONMENT="${{ secrets.ASPNETCORE_ENVIRONMENT || 'Production' }}"
+            export DB_HOST="${{ secrets.DB_HOST }}"
+            export DB_NAME="${{ secrets.DB_NAME || 'ruby' }}"
+            export DB_USER="${{ secrets.DB_USER || 'postgres' }}"
+            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            export JWT_KEY="${{ secrets.JWT_KEY }}"
+            export JWT_ISSUER="${{ secrets.JWT_ISSUER || 'ruby-backend' }}"
+            export JWT_AUDIENCE="${{ secrets.JWT_AUDIENCE || 'ruby-client' }}"
+
+            sudo mkdir -p "$EC2_DEPLOY_PATH/releases"
+            TIMESTAMP=$(date +%Y%m%d%H%M%S)
+            sudo mkdir -p "$EC2_DEPLOY_PATH/releases/$TIMESTAMP"
+            sudo tar -xzf /tmp/${{ env.ARTIFACT_NAME }} -C "$EC2_DEPLOY_PATH/releases/$TIMESTAMP"
+            sudo ln -sfn "$EC2_DEPLOY_PATH/releases/$TIMESTAMP" "$EC2_DEPLOY_PATH/current"
+
+            sudo tee /etc/systemd/system/ruby-backend.service > /dev/null <<EOF
+            [Unit]
+            Description=Ruby Backend API
+            After=network.target
+
+            [Service]
+            WorkingDirectory=$EC2_DEPLOY_PATH/current
+            User=ec2-user
+            Group=ec2-user
+            Environment=ASPNETCORE_ENVIRONMENT=$ASPNETCORE_ENVIRONMENT
+            Environment=ASPNETCORE_URLS=http://0.0.0.0:8000
+            Environment=ConnectionStrings__DefaultConnection="Host=$DB_HOST;Port=5432;Database=$DB_NAME;Username=$DB_USER;Password=$DB_PASSWORD;"
+            Environment=DatabaseConnection__Host=$DB_HOST
+            Environment=DatabaseConnection__Port=5432
+            Environment=DatabaseConnection__Database=$DB_NAME
+            Environment=DatabaseConnection__Username=$DB_USER
+            Environment=DatabaseConnection__Password=$DB_PASSWORD
+            Environment=Jwt__Key=$JWT_KEY
+            Environment=Jwt__Issuer=$JWT_ISSUER
+            Environment=Jwt__Audience=$JWT_AUDIENCE
+            ExecStart=/usr/share/dotnet/dotnet $EC2_DEPLOY_PATH/current/ruby.api.dll
+            Restart=always
+            RestartSec=10
+            SyslogIdentifier=ruby-backend
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+
+            sudo systemctl daemon-reload
+            sudo systemctl enable ruby-backend
+            sudo systemctl restart ruby-backend
+            sudo systemctl status ruby-backend --no-pager -l --lines=20
