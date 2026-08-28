@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="77a53ee4-6e0b-4678-b843-406c5a144171" name="ipbes@PRAKASH 2026-08-29 01:51:23" runUser="PRAKASH\ipbes" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-08-29T01:51:23.3113834+05:30" queuing="2026-08-29T01:51:23.3113846+05:30" start="2026-08-29T01:51:14.8973086+05:30" finish="2026-08-29T01:51:23.5042815+05:30" />
+  <TestSettings name="default" id="f6c99d5a-b224-4e7e-ab65-ade4e059cf5b">
+    <Deployment runDeploymentRoot="ipbes_PRAKASH_2026-08-29_01_51_23" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="8169de6f-72cf-4d4a-adf0-fb908d0fa5ac" testId="31f1a12c-2295-e776-52da-2b6f714b562d" testName="ruby.api.tests.AuthenticationControllerTests.QuickLogin_ReturnsBadRequest_WhenAuthenticationFails" computerName="PRAKASH" duration="00:00:00.5248134" startTime="2026-08-29T01:51:23.3297811+05:30" endTime="2026-08-29T01:51:23.3297821+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8169de6f-72cf-4d4a-adf0-fb908d0fa5ac" />
+    <UnitTestResult executionId="6d34c34a-0d4a-4b08-ba18-2de5a66836d4" testId="26af9601-16ec-cc88-cea0-2bfab5b5a41c" testName="ruby.api.tests.AuthenticationControllerTests.QuickLogin_ReturnsOk_WhenAuthenticationSucceeds" computerName="PRAKASH" duration="00:00:00.0048216" startTime="2026-08-29T01:51:23.3348599+05:30" endTime="2026-08-29T01:51:23.3348607+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6d34c34a-0d4a-4b08-ba18-2de5a66836d4" />
+    <UnitTestResult executionId="54f84319-bd4c-4a0b-bc64-8d02674e2680" testId="5a098f66-c34a-1327-e8ae-ad34bb9f649b" testName="ruby.api.tests.ProfileControllerTests.GetProfile_ReturnsNotFound_WhenServiceFails" computerName="PRAKASH" duration="00:00:00.0023008" startTime="2026-08-29T01:51:23.2907456+05:30" endTime="2026-08-29T01:51:23.2907467+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="54f84319-bd4c-4a0b-bc64-8d02674e2680" />
+    <UnitTestResult executionId="73474955-b4e2-4f9c-a625-f77fbf572667" testId="3ff2307c-e4b5-9877-579b-eefc5303ea40" testName="ruby.api.tests.ProfileControllerTests.GetProfile_ReturnsOk_WithProfileDetails" computerName="PRAKASH" duration="00:00:00.0095288" startTime="2026-08-29T01:51:23.2881451+05:30" endTime="2026-08-29T01:51:23.2881462+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="73474955-b4e2-4f9c-a625-f77fbf572667" />
+    <UnitTestResult executionId="2c222c57-aaef-406d-9942-f0767eddea8f" testId="d08a4b56-8031-77d5-6ec9-bf8d7338cd5e" testName="ruby.api.tests.ProfileControllerTests.UpdateProfile_ReturnsBadRequest_WhenServiceFails" computerName="PRAKASH" duration="00:00:00.8562439" startTime="2026-08-29T01:51:23.1410543+05:30" endTime="2026-08-29T01:51:23.1410553+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2c222c57-aaef-406d-9942-f0767eddea8f" />
+    <UnitTestResult executionId="bae7ecdb-dff1-49cf-bc9d-19537c44d07c" testId="cac4bd69-3533-e21a-15c9-0dde7e046de7" testName="ruby.api.tests.ProfileControllerTests.RateProfile_ReturnsOk_WhenServiceSucceeds" computerName="PRAKASH" duration="00:00:00.0087375" startTime="2026-08-29T01:51:23.2583152+05:30" endTime="2026-08-29T01:51:23.2583163+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bae7ecdb-dff1-49cf-bc9d-19537c44d07c" />
+    <UnitTestResult executionId="c43995f2-398c-442b-8761-a8918441ac37" testId="1170baa2-dee0-4f96-d005-c009dfc3f289" testName="ruby.api.tests.ProfileControllerTests.GetProfile_DoesNotInjectSyntheticProfileChips_WhenRepositoryReturnsEmptyList" computerName="PRAKASH" duration="00:00:00.0527535" startTime="2026-08-29T01:51:23.1977447+05:30" endTime="2026-08-29T01:51:23.1977454+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c43995f2-398c-442b-8761-a8918441ac37" />
+    <UnitTestResult executionId="0654b287-85fb-4406-8c64-1b7851a2a4e1" testId="555d4a38-fed3-0877-077b-14f266170ccf" testName="ruby.api.tests.ProfileControllerTests.UpdateProfile_ReturnsOk_WhenServiceSucceeds" computerName="PRAKASH" duration="00:00:00.0034824" startTime="2026-08-29T01:51:23.1447512+05:30" endTime="2026-08-29T01:51:23.1447521+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0654b287-85fb-4406-8c64-1b7851a2a4e1" />
+    <UnitTestResult executionId="49e5e61e-6052-431c-a5ff-def4a31b65fc" testId="543c5ef4-01ff-d791-e557-54b1acebbb44" testName="ruby.api.tests.AuthenticationControllerTests.DeviceLoginRequest_RequiresDeviceId" computerName="PRAKASH" duration="00:00:00.5105077" startTime="2026-08-29T01:51:22.8010850+05:30" endTime="2026-08-29T01:51:22.8011161+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="49e5e61e-6052-431c-a5ff-def4a31b65fc" />
+    <UnitTestResult executionId="f82d689f-0e95-49ce-b5d1-2588c9916f54" testId="4da867d1-ce8b-b13a-87b7-2e27c2779f62" testName="ruby.api.tests.ProfileControllerTests.UpdateProfile_UsesProfileId_WhenProvided" computerName="PRAKASH" duration="00:00:00.0198139" startTime="2026-08-29T01:51:23.2783311+05:30" endTime="2026-08-29T01:51:23.2783317+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f82d689f-0e95-49ce-b5d1-2588c9916f54" />
+    <UnitTestResult executionId="4e26d3aa-38bd-45ab-b27d-4a609629bf98" testId="e0899355-d1f7-eb08-e9e2-07568f5ee4ac" testName="ruby.api.tests.HomeControllerTests.GetFollowingUsers_ReturnsOk_WithUserPreviewList" computerName="PRAKASH" duration="00:00:00.8578262" startTime="2026-08-29T01:51:23.1425461+05:30" endTime="2026-08-29T01:51:23.1425466+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4e26d3aa-38bd-45ab-b27d-4a609629bf98" />
+    <UnitTestResult executionId="92327046-eb02-4a4c-a596-68b9ce5b7849" testId="9ade3b95-d363-090d-7942-817e481f9896" testName="ruby.api.tests.ProfileControllerTests.UpdateProfileAsync_PersistsProfileDetailsAndChipSelections" computerName="PRAKASH" duration="00:00:00.0512680" startTime="2026-08-29T01:51:23.2492982+05:30" endTime="2026-08-29T01:51:23.2492992+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="92327046-eb02-4a4c-a596-68b9ce5b7849" />
+    <UnitTestResult executionId="8ec9416a-a898-4103-b687-1b34a785f36d" testId="93018349-d71d-2681-1a30-c4f22e592a48" testName="ruby.api.tests.HomeControllerTests.GetDiscoverUsers_ReturnsOk_WithUserPreviewList" computerName="PRAKASH" duration="00:00:00.0084417" startTime="2026-08-29T01:51:23.1512865+05:30" endTime="2026-08-29T01:51:23.1512872+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8ec9416a-a898-4103-b687-1b34a785f36d" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="ruby.api.tests.ProfileControllerTests.UpdateProfileAsync_PersistsProfileDetailsAndChipSelections" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="9ade3b95-d363-090d-7942-817e481f9896">
+      <Execution id="92327046-eb02-4a4c-a596-68b9ce5b7849" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.ProfileControllerTests" name="UpdateProfileAsync_PersistsProfileDetailsAndChipSelections" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.ProfileControllerTests.GetProfile_DoesNotInjectSyntheticProfileChips_WhenRepositoryReturnsEmptyList" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="1170baa2-dee0-4f96-d005-c009dfc3f289">
+      <Execution id="c43995f2-398c-442b-8761-a8918441ac37" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.ProfileControllerTests" name="GetProfile_DoesNotInjectSyntheticProfileChips_WhenRepositoryReturnsEmptyList" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.AuthenticationControllerTests.QuickLogin_ReturnsBadRequest_WhenAuthenticationFails" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="31f1a12c-2295-e776-52da-2b6f714b562d">
+      <Execution id="8169de6f-72cf-4d4a-adf0-fb908d0fa5ac" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.AuthenticationControllerTests" name="QuickLogin_ReturnsBadRequest_WhenAuthenticationFails" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.ProfileControllerTests.RateProfile_ReturnsOk_WhenServiceSucceeds" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="cac4bd69-3533-e21a-15c9-0dde7e046de7">
+      <Execution id="bae7ecdb-dff1-49cf-bc9d-19537c44d07c" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.ProfileControllerTests" name="RateProfile_ReturnsOk_WhenServiceSucceeds" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.ProfileControllerTests.UpdateProfile_ReturnsOk_WhenServiceSucceeds" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="555d4a38-fed3-0877-077b-14f266170ccf">
+      <Execution id="0654b287-85fb-4406-8c64-1b7851a2a4e1" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.ProfileControllerTests" name="UpdateProfile_ReturnsOk_WhenServiceSucceeds" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.AuthenticationControllerTests.QuickLogin_ReturnsOk_WhenAuthenticationSucceeds" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="26af9601-16ec-cc88-cea0-2bfab5b5a41c">
+      <Execution id="6d34c34a-0d4a-4b08-ba18-2de5a66836d4" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.AuthenticationControllerTests" name="QuickLogin_ReturnsOk_WhenAuthenticationSucceeds" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.ProfileControllerTests.UpdateProfile_UsesProfileId_WhenProvided" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="4da867d1-ce8b-b13a-87b7-2e27c2779f62">
+      <Execution id="f82d689f-0e95-49ce-b5d1-2588c9916f54" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.ProfileControllerTests" name="UpdateProfile_UsesProfileId_WhenProvided" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.ProfileControllerTests.GetProfile_ReturnsNotFound_WhenServiceFails" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="5a098f66-c34a-1327-e8ae-ad34bb9f649b">
+      <Execution id="54f84319-bd4c-4a0b-bc64-8d02674e2680" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.ProfileControllerTests" name="GetProfile_ReturnsNotFound_WhenServiceFails" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.ProfileControllerTests.GetProfile_ReturnsOk_WithProfileDetails" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="3ff2307c-e4b5-9877-579b-eefc5303ea40">
+      <Execution id="73474955-b4e2-4f9c-a625-f77fbf572667" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.ProfileControllerTests" name="GetProfile_ReturnsOk_WithProfileDetails" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.ProfileControllerTests.UpdateProfile_ReturnsBadRequest_WhenServiceFails" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="d08a4b56-8031-77d5-6ec9-bf8d7338cd5e">
+      <Execution id="2c222c57-aaef-406d-9942-f0767eddea8f" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.ProfileControllerTests" name="UpdateProfile_ReturnsBadRequest_WhenServiceFails" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.AuthenticationControllerTests.DeviceLoginRequest_RequiresDeviceId" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="543c5ef4-01ff-d791-e557-54b1acebbb44">
+      <Execution id="49e5e61e-6052-431c-a5ff-def4a31b65fc" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.AuthenticationControllerTests" name="DeviceLoginRequest_RequiresDeviceId" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.HomeControllerTests.GetDiscoverUsers_ReturnsOk_WithUserPreviewList" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="93018349-d71d-2681-1a30-c4f22e592a48">
+      <Execution id="8ec9416a-a898-4103-b687-1b34a785f36d" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.HomeControllerTests" name="GetDiscoverUsers_ReturnsOk_WithUserPreviewList" />
+    </UnitTest>
+    <UnitTest name="ruby.api.tests.HomeControllerTests.GetFollowingUsers_ReturnsOk_WithUserPreviewList" storage="c:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\release\net8.0\ruby.tests.dll" id="e0899355-d1f7-eb08-e9e2-07568f5ee4ac">
+      <Execution id="4e26d3aa-38bd-45ab-b27d-4a609629bf98" />
+      <TestMethod codeBase="C:\source\github-repos\ruby-app\ruby-backend\ruby.tests\bin\Release\net8.0\ruby.tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="ruby.api.tests.HomeControllerTests" name="GetFollowingUsers_ReturnsOk_WithUserPreviewList" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="31f1a12c-2295-e776-52da-2b6f714b562d" executionId="8169de6f-72cf-4d4a-adf0-fb908d0fa5ac" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="26af9601-16ec-cc88-cea0-2bfab5b5a41c" executionId="6d34c34a-0d4a-4b08-ba18-2de5a66836d4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5a098f66-c34a-1327-e8ae-ad34bb9f649b" executionId="54f84319-bd4c-4a0b-bc64-8d02674e2680" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3ff2307c-e4b5-9877-579b-eefc5303ea40" executionId="73474955-b4e2-4f9c-a625-f77fbf572667" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d08a4b56-8031-77d5-6ec9-bf8d7338cd5e" executionId="2c222c57-aaef-406d-9942-f0767eddea8f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cac4bd69-3533-e21a-15c9-0dde7e046de7" executionId="bae7ecdb-dff1-49cf-bc9d-19537c44d07c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1170baa2-dee0-4f96-d005-c009dfc3f289" executionId="c43995f2-398c-442b-8761-a8918441ac37" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="555d4a38-fed3-0877-077b-14f266170ccf" executionId="0654b287-85fb-4406-8c64-1b7851a2a4e1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="543c5ef4-01ff-d791-e557-54b1acebbb44" executionId="49e5e61e-6052-431c-a5ff-def4a31b65fc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4da867d1-ce8b-b13a-87b7-2e27c2779f62" executionId="f82d689f-0e95-49ce-b5d1-2588c9916f54" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e0899355-d1f7-eb08-e9e2-07568f5ee4ac" executionId="4e26d3aa-38bd-45ab-b27d-4a609629bf98" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9ade3b95-d363-090d-7942-817e481f9896" executionId="92327046-eb02-4a4c-a596-68b9ce5b7849" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="93018349-d71d-2681-1a30-c4f22e592a48" executionId="8ec9416a-a898-4103-b687-1b34a785f36d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="13" executed="13" passed="13" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.28)&#xD;
+[xUnit.net 00:00:02.37]   Discovering: ruby.tests&#xD;
+[xUnit.net 00:00:02.43]   Discovered:  ruby.tests&#xD;
+[xUnit.net 00:00:02.44]   Starting:    ruby.tests&#xD;
+[xUnit.net 00:00:03.59]   Finished:    ruby.tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>
