@@ -9,6 +9,7 @@ namespace ruby.domain.Models.Responses
         public string Name { get; set; } = string.Empty;
         public string CountryCode { get; set; } = "IN";
         public int? Age { get; set; }
+        public string? Status { get; set; }
         public bool IsOnline { get; set; }
         public string? AvatarUrl { get; set; }
         public bool IsFollowing { get; set; }

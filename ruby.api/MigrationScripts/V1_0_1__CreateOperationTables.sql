@@ -1,4 +1,4 @@
-﻿-- V1_0_1__CreateOperationTables.sql
+-- V1_0_1__CreateOperationTables.sql
 -- PostgreSQL migration: operational tables (Users, RefreshTokens, Profiles, Wallets, WalletTransactions, Gifts, GiftTransactions, Conversations, ConversationMembers, Messages, Calls, CallParticipants, CoinPackages, Payments, Notifications)
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -45,22 +45,23 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_userauthentications_provider_provideruserid
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_userauthentications_user') THEN
-	EXECUTE 'ALTER TABLE public.userauthentications ADD CONSTRAINT fk_userauthentications_user FOREIGN KEY (userid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.userauthentications ADD CONSTRAINT fk_userauthentications_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 END;
 $$;
 
 -- Profiles (one-to-one, UserId PK)
 CREATE TABLE IF NOT EXISTS public.profiles (
-  userid uuid PRIMARY KEY,
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  userid uuid NOT NULL,
   firstname varchar(100),
   lastname varchar(100),
   displayname varchar(200),
   gender uuid,
   dob date,
-  country uuid,
-  city varchar(100),
+  addressid uuid,
   language uuid,
+  level integer NOT NULL DEFAULT 1 CHECK (level >= 1 AND level <= 100),
   bio text,
   avatarurl text,
   isverified boolean NOT NULL DEFAULT false,
@@ -68,8 +69,75 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid
 );
+CREATE UNIQUE INDEX IF NOT EXISTS ux_profiles_userid ON public.profiles (userid);
+CREATE INDEX IF NOT EXISTS ix_profiles_addressid ON public.profiles (addressid);
 CREATE INDEX IF NOT EXISTS ix_profiles_language ON public.profiles (language);
+CREATE INDEX IF NOT EXISTS ix_profiles_gender ON public.profiles (gender);
+CREATE INDEX IF NOT EXISTS ix_profiles_dob ON public.profiles (dob);
 CREATE INDEX IF NOT EXISTS ix_profiles_updatedby ON public.profiles (updatedby);
+
+ALTER TABLE public.profiles
+  DROP COLUMN IF EXISTS city,
+  DROP COLUMN IF EXISTS country;
+
+CREATE TABLE IF NOT EXISTS public.addresses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  streetline1 varchar(200),
+  streetline2 varchar(200),
+  city varchar(100),
+  state varchar(100),
+  postalcode varchar(30),
+  country varchar(150),
+  countrycode varchar(10),
+  latitude double precision,
+  longitude double precision,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
+);
+CREATE INDEX IF NOT EXISTS ix_addresses_city ON public.addresses (city);
+CREATE INDEX IF NOT EXISTS ix_addresses_country ON public.addresses (country);
+CREATE INDEX IF NOT EXISTS ix_addresses_countrycode ON public.addresses (countrycode);
+CREATE INDEX IF NOT EXISTS ix_addresses_state ON public.addresses (state);
+CREATE INDEX IF NOT EXISTS ix_addresses_updatedby ON public.addresses (updatedby);
+
+CREATE TABLE IF NOT EXISTS public.profileaddresses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  profileid uuid NOT NULL,
+  addressid uuid NOT NULL,
+  isprimary boolean NOT NULL DEFAULT false,
+  iscurrent boolean NOT NULL DEFAULT true,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_profileaddresses_profile_address
+  ON public.profileaddresses (profileid, addressid);
+CREATE INDEX IF NOT EXISTS ix_profileaddresses_profileid ON public.profileaddresses (profileid);
+CREATE INDEX IF NOT EXISTS ix_profileaddresses_addressid ON public.profileaddresses (addressid);
+
+CREATE TABLE IF NOT EXISTS public.profileimages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  profileid uuid NOT NULL,
+  imageurl text NOT NULL,
+  isdefault boolean NOT NULL DEFAULT false,
+  isactive boolean NOT NULL DEFAULT true,
+  createdat timestamptz NOT NULL DEFAULT now(),
+  updatedat timestamptz NOT NULL DEFAULT now(),
+  updatedby uuid
+);
+CREATE INDEX IF NOT EXISTS ix_profileimages_profileid ON public.profileimages (profileid);
+CREATE INDEX IF NOT EXISTS ix_profileimages_default ON public.profileimages (profileid, isdefault);
+
+CREATE TABLE IF NOT EXISTS public.profilechips (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  profileid uuid NOT NULL,
+  chipid uuid NOT NULL,
+  createdat timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_profilechips_profile_chip ON public.profilechips (profileid, chipid);
+CREATE INDEX IF NOT EXISTS ix_profilechips_profileid ON public.profilechips (profileid);
+CREATE INDEX IF NOT EXISTS ix_profilechips_chipid ON public.profilechips (chipid);
 
 -- Wallets
 CREATE TABLE IF NOT EXISTS public.wallets (
@@ -141,14 +209,16 @@ CREATE TABLE IF NOT EXISTS public.conversations (
 
 -- ConversationMembers
 CREATE TABLE IF NOT EXISTS public.conversationmembers (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   conversationid uuid NOT NULL,
   userid uuid NOT NULL,
   joinedat timestamptz NOT NULL DEFAULT now(),
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid,
-  CONSTRAINT pk_conversationmembers PRIMARY KEY (conversationid, userid)
+  CONSTRAINT ux_conversationmembers_conversation_user UNIQUE (conversationid, userid)
 );
+CREATE INDEX IF NOT EXISTS ix_conversationmembers_conversationid ON public.conversationmembers (conversationid);
 CREATE INDEX IF NOT EXISTS ix_conversationmembers_userid ON public.conversationmembers (userid);
 
 -- Messages
@@ -184,9 +254,11 @@ CREATE TABLE IF NOT EXISTS public.calls (
   updatedby uuid
 );
 CREATE INDEX IF NOT EXISTS ix_calls_conversationid ON public.calls (conversationid);
+CREATE INDEX IF NOT EXISTS ix_calls_endedby ON public.calls (endedby);
 
 -- CallParticipants
 CREATE TABLE IF NOT EXISTS public.callparticipants (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   callid uuid NOT NULL,
   userid uuid NOT NULL,
   role varchar(50),
@@ -195,8 +267,9 @@ CREATE TABLE IF NOT EXISTS public.callparticipants (
   createdat timestamptz NOT NULL DEFAULT now(),
   updatedat timestamptz NOT NULL DEFAULT now(),
   updatedby uuid,
-  CONSTRAINT pk_callparticipants PRIMARY KEY (callid, userid)
+  CONSTRAINT ux_callparticipants_call_user UNIQUE (callid, userid)
 );
+CREATE INDEX IF NOT EXISTS ix_callparticipants_callid ON public.callparticipants (callid);
 CREATE INDEX IF NOT EXISTS ix_callparticipants_userid ON public.callparticipants (userid);
 
 -- CoinPackages
@@ -229,6 +302,7 @@ CREATE TABLE IF NOT EXISTS public.payments (
 );
 CREATE INDEX IF NOT EXISTS ix_payments_userid ON public.payments (userid);
 CREATE INDEX IF NOT EXISTS ix_payments_coinpackageid ON public.payments (coinpackageid);
+CREATE INDEX IF NOT EXISTS ix_payments_status ON public.payments (status);
 
 -- Notifications
 CREATE TABLE IF NOT EXISTS public.notifications (
@@ -243,16 +317,17 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   updatedby uuid
 );
 CREATE INDEX IF NOT EXISTS ix_notifications_userid ON public.notifications (userid);
+CREATE INDEX IF NOT EXISTS ix_notifications_isread ON public.notifications (isread);
 
 -- Add foreign key constraints and UpdatedBy FKs
 DO $$
 BEGIN
   -- RefreshTokens
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_refreshtokens_user') THEN
-	EXECUTE 'ALTER TABLE public.refreshtokens ADD CONSTRAINT fk_refreshtokens_user FOREIGN KEY (userid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.refreshtokens ADD CONSTRAINT fk_refreshtokens_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_refreshtokens_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.refreshtokens ADD CONSTRAINT fk_refreshtokens_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.refreshtokens ADD CONSTRAINT fk_refreshtokens_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_refreshtokens_device') THEN
 	-- Only add FK if the referenced table exists to avoid migration failure
@@ -269,18 +344,51 @@ BEGIN
 
   -- Profiles -> Users
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profiles_user') THEN
-	EXECUTE 'ALTER TABLE public.profiles ADD CONSTRAINT fk_profiles_user FOREIGN KEY (userid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.profiles ADD CONSTRAINT fk_profiles_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profiles_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.profiles ADD CONSTRAINT fk_profiles_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.profiles ADD CONSTRAINT fk_profiles_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profiles_address') THEN
+	EXECUTE 'ALTER TABLE public.profiles ADD CONSTRAINT fk_profiles_address FOREIGN KEY (addressid) REFERENCES public.addresses(id) ON DELETE SET NULL';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profiles_language') THEN
+	EXECUTE 'ALTER TABLE public.profiles ADD CONSTRAINT fk_profiles_language FOREIGN KEY (language) REFERENCES public.languages(id) ON DELETE SET NULL';
+  END IF;
+
+  -- ProfileAddresses -> Profiles & Addresses
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profileaddresses_profile') THEN
+	EXECUTE 'ALTER TABLE public.profileaddresses ADD CONSTRAINT fk_profileaddresses_profile FOREIGN KEY (profileid) REFERENCES public.profiles(userid) ON DELETE CASCADE';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profileaddresses_address') THEN
+	EXECUTE 'ALTER TABLE public.profileaddresses ADD CONSTRAINT fk_profileaddresses_address FOREIGN KEY (addressid) REFERENCES public.addresses(id) ON DELETE CASCADE';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profileaddresses_updatedby') THEN
+	EXECUTE 'ALTER TABLE public.profileaddresses ADD CONSTRAINT fk_profileaddresses_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
+  END IF;
+
+  -- ProfileImages -> Profiles
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profileimages_profile') THEN
+	EXECUTE 'ALTER TABLE public.profileimages ADD CONSTRAINT fk_profileimages_profile FOREIGN KEY (profileid) REFERENCES public.profiles(userid) ON DELETE CASCADE';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profileimages_updatedby') THEN
+	EXECUTE 'ALTER TABLE public.profileimages ADD CONSTRAINT fk_profileimages_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
+  END IF;
+
+  -- ProfileChips -> Profiles & Chips
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profilechips_profile') THEN
+	EXECUTE 'ALTER TABLE public.profilechips ADD CONSTRAINT fk_profilechips_profile FOREIGN KEY (profileid) REFERENCES public.profiles(userid) ON DELETE CASCADE';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profilechips_chip') THEN
+	EXECUTE 'ALTER TABLE public.profilechips ADD CONSTRAINT fk_profilechips_chip FOREIGN KEY (chipid) REFERENCES public.chips(id) ON DELETE CASCADE';
   END IF;
 
   -- Wallets -> Users
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_wallets_user') THEN
-	EXECUTE 'ALTER TABLE public.wallets ADD CONSTRAINT fk_wallets_user FOREIGN KEY (userid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.wallets ADD CONSTRAINT fk_wallets_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_wallets_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.wallets ADD CONSTRAINT fk_wallets_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.wallets ADD CONSTRAINT fk_wallets_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   -- WalletTransactions -> Wallets
@@ -288,7 +396,7 @@ BEGIN
 	EXECUTE 'ALTER TABLE public.wallettransactions ADD CONSTRAINT fk_wallettransactions_wallet FOREIGN KEY (walletid) REFERENCES public.wallets(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_wallettransactions_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.wallettransactions ADD CONSTRAINT fk_wallettransactions_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.wallettransactions ADD CONSTRAINT fk_wallettransactions_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   -- Gift transactions
@@ -299,10 +407,10 @@ BEGIN
 	EXECUTE 'ALTER TABLE public.gifttransactions ADD CONSTRAINT fk_gifttransactions_wallettx FOREIGN KEY (wallettransactionid) REFERENCES public.wallettransactions(id) ON DELETE SET NULL';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_gifttransactions_senderuser') THEN
-	EXECUTE 'ALTER TABLE public.gifttransactions ADD CONSTRAINT fk_gifttransactions_senderuser FOREIGN KEY (senderuserid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.gifttransactions ADD CONSTRAINT fk_gifttransactions_senderuser FOREIGN KEY (senderuserid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_gifttransactions_receiveruser') THEN
-	EXECUTE 'ALTER TABLE public.gifttransactions ADD CONSTRAINT fk_gifttransactions_receiveruser FOREIGN KEY (receiveruserid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.gifttransactions ADD CONSTRAINT fk_gifttransactions_receiveruser FOREIGN KEY (receiveruserid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 
   -- Conversations and members
@@ -310,7 +418,7 @@ BEGIN
 	EXECUTE 'ALTER TABLE public.conversationmembers ADD CONSTRAINT fk_conversationmembers_conversation FOREIGN KEY (conversationid) REFERENCES public.conversations(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_conversationmembers_user') THEN
-	EXECUTE 'ALTER TABLE public.conversationmembers ADD CONSTRAINT fk_conversationmembers_user FOREIGN KEY (userid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.conversationmembers ADD CONSTRAINT fk_conversationmembers_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 
   -- Messages
@@ -318,7 +426,7 @@ BEGIN
 	EXECUTE 'ALTER TABLE public.messages ADD CONSTRAINT fk_messages_conversation FOREIGN KEY (conversationid) REFERENCES public.conversations(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_messages_sender') THEN
-	EXECUTE 'ALTER TABLE public.messages ADD CONSTRAINT fk_messages_sender FOREIGN KEY (senderuserid) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.messages ADD CONSTRAINT fk_messages_sender FOREIGN KEY (senderuserid) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   -- Calls
@@ -326,7 +434,7 @@ BEGIN
 	EXECUTE 'ALTER TABLE public.calls ADD CONSTRAINT fk_calls_conversation FOREIGN KEY (conversationid) REFERENCES public.conversations(id) ON DELETE SET NULL';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_calls_endedby') THEN
-	EXECUTE 'ALTER TABLE public.calls ADD CONSTRAINT fk_calls_endedby FOREIGN KEY (endedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.calls ADD CONSTRAINT fk_calls_endedby FOREIGN KEY (endedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   -- CallParticipants
@@ -334,12 +442,12 @@ BEGIN
 	EXECUTE 'ALTER TABLE public.callparticipants ADD CONSTRAINT fk_callparticipants_call FOREIGN KEY (callid) REFERENCES public.calls(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_callparticipants_user') THEN
-	EXECUTE 'ALTER TABLE public.callparticipants ADD CONSTRAINT fk_callparticipants_user FOREIGN KEY (userid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.callparticipants ADD CONSTRAINT fk_callparticipants_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 
   -- CoinPackages/Payments
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_payments_user') THEN
-	EXECUTE 'ALTER TABLE public.payments ADD CONSTRAINT fk_payments_user FOREIGN KEY (userid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.payments ADD CONSTRAINT fk_payments_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_payments_coinpackage') THEN
 	EXECUTE 'ALTER TABLE public.payments ADD CONSTRAINT fk_payments_coinpackage FOREIGN KEY (coinpackageid) REFERENCES public.coinpackages(id) ON DELETE RESTRICT';
@@ -347,60 +455,60 @@ BEGIN
 
   -- Notifications
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_notifications_user') THEN
-	EXECUTE 'ALTER TABLE public.notifications ADD CONSTRAINT fk_notifications_user FOREIGN KEY (userid) REFERENCES public.Users(id) ON DELETE CASCADE';
+	EXECUTE 'ALTER TABLE public.notifications ADD CONSTRAINT fk_notifications_user FOREIGN KEY (userid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 
   -- Attach UpdatedBy FKs where missing
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_users_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.Users ADD CONSTRAINT fk_users_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.useraccount ADD CONSTRAINT fk_users_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profiles_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.profiles ADD CONSTRAINT fk_profiles_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.profiles ADD CONSTRAINT fk_profiles_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_wallets_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.wallets ADD CONSTRAINT fk_wallets_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.wallets ADD CONSTRAINT fk_wallets_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_wallettransactions_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.wallettransactions ADD CONSTRAINT fk_wallettransactions_updatedby FOREIGN KEY (updatedby) REFERENCES public.users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.wallettransactions ADD CONSTRAINT fk_wallettransactions_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_gifts_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.gifts ADD CONSTRAINT fk_gifts_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.gifts ADD CONSTRAINT fk_gifts_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_gifttransactions_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.gifttransactions ADD CONSTRAINT fk_gifttransactions_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.gifttransactions ADD CONSTRAINT fk_gifttransactions_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_conversations_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.conversations ADD CONSTRAINT fk_conversations_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.conversations ADD CONSTRAINT fk_conversations_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_messages_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.messages ADD CONSTRAINT fk_messages_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.messages ADD CONSTRAINT fk_messages_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_calls_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.calls ADD CONSTRAINT fk_calls_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.calls ADD CONSTRAINT fk_calls_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_callparticipants_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.callparticipants ADD CONSTRAINT fk_callparticipants_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.callparticipants ADD CONSTRAINT fk_callparticipants_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_coinpackages_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.coinpackages ADD CONSTRAINT fk_coinpackages_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.coinpackages ADD CONSTRAINT fk_coinpackages_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_payments_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.payments ADD CONSTRAINT fk_payments_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.payments ADD CONSTRAINT fk_payments_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_notifications_updatedby') THEN
-	EXECUTE 'ALTER TABLE public.notifications ADD CONSTRAINT fk_notifications_updatedby FOREIGN KEY (updatedby) REFERENCES public.Users(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.notifications ADD CONSTRAINT fk_notifications_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 END;
 $$;
@@ -409,25 +517,25 @@ $$;
 DO $$
 BEGIN
   -- Users -> UserStatuses
-IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='userstatusid') THEN
-	EXECUTE 'ALTER TABLE public.Users ADD COLUMN userstatusid uuid';
+IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='useraccount' AND column_name='userstatusid') THEN
+	EXECUTE 'ALTER TABLE public.useraccount ADD COLUMN userstatusid uuid';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_users_userstatus') THEN
-	EXECUTE 'ALTER TABLE public.Users ADD CONSTRAINT fk_users_userstatus FOREIGN KEY (userstatusid) REFERENCES public.userstatuses(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.useraccount ADD CONSTRAINT fk_users_userstatus FOREIGN KEY (userstatusid) REFERENCES public.userstatuses(id) ON DELETE SET NULL';
   END IF;
 	IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'ix_users_userstatusid') THEN
-		EXECUTE 'CREATE INDEX ix_users_userstatusid ON public.Users (userstatusid)';
+		EXECUTE 'CREATE INDEX ix_users_userstatusid ON public.useraccount (userstatusid)';
   END IF;
 
   -- Users -> UserRoles (single role on Users)
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='userroleid') THEN
-	EXECUTE 'ALTER TABLE public.Users ADD COLUMN userroleid uuid';
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='useraccount' AND column_name='userroleid') THEN
+	EXECUTE 'ALTER TABLE public.useraccount ADD COLUMN userroleid uuid';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_users_userrole') THEN
-	EXECUTE 'ALTER TABLE public.Users ADD CONSTRAINT fk_users_userrole FOREIGN KEY (userroleid) REFERENCES public.userroles(id) ON DELETE SET NULL';
+	EXECUTE 'ALTER TABLE public.useraccount ADD CONSTRAINT fk_users_userrole FOREIGN KEY (userroleid) REFERENCES public.userroles(id) ON DELETE SET NULL';
   END IF;
 	IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'ix_users_userroleid') THEN
-		EXECUTE 'CREATE INDEX ix_users_userroleid ON public.Users (userroleid)';
+		EXECUTE 'CREATE INDEX ix_users_userroleid ON public.useraccount (userroleid)';
   END IF;
 
   -- Profiles -> Genders (Profiles.Gender already exists as uuid, add FK)
@@ -505,9 +613,9 @@ END;
 $$;
 
 -- Attach update triggers to tables created above
-DROP TRIGGER IF EXISTS trg_users_update_timestamp ON public.users;
+DROP TRIGGER IF EXISTS trg_users_update_timestamp ON public.useraccount;
 CREATE TRIGGER trg_users_update_timestamp
-BEFORE UPDATE ON public.users
+BEFORE UPDATE ON public.useraccount
 FOR EACH ROW
 EXECUTE FUNCTION public.update_timestamp();
 

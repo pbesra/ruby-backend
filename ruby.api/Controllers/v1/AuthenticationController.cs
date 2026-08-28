@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ruby.application.Ports.In.IServices;
 using ruby.domain.Models.Requests;
@@ -11,10 +13,12 @@ namespace ruby.api.Controllers.v1
     public class AuthenticationController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly ILogger<AuthenticationController> _logger;
 
-        public AuthenticationController(IAuthenticationService authenticationService)
+        public AuthenticationController(IAuthenticationService authenticationService, ILogger<AuthenticationController>? logger = null)
         {
             _authenticationService = authenticationService;
+            _logger = logger ?? NullLogger<AuthenticationController>.Instance;
         }
 
         [HttpPost("register")]
@@ -57,19 +61,99 @@ namespace ruby.api.Controllers.v1
         }
 
         [HttpPost("login/device")]
-        public async Task<IActionResult> LoginWithDevice([FromBody] ruby.domain.Models.Requests.DeviceLoginRequest request)
+        public async Task<IActionResult> LoginWithDevice()
         {
+            var request = await ParseDeviceLoginRequestAsync();
             var response = await _authenticationService.LoginWithDeviceAsync(request);
             if (!response.Success) return BadRequest(response);
             return Ok(response);
         }
 
         [HttpPost("login/quick")]
-        public async Task<IActionResult> QuickLogin([FromBody] DeviceLoginRequest request)
+        public async Task<IActionResult> QuickLogin()
         {
+            _logger.LogInformation(
+                "Quick login request received. RemoteIp={RemoteIp}, UserAgent={UserAgent}",
+                HttpContext.Connection.RemoteIpAddress,
+                Request.Headers.UserAgent.ToString());
+
+            var request = await ParseDeviceLoginRequestAsync();
+            _logger.LogInformation(
+                "Quick login parsed payload. DeviceId={DeviceId}, DeviceName={DeviceName}",
+                request.DeviceId,
+                request.DeviceName);
+
             var response = await _authenticationService.LoginWithDeviceAsync(request);
-            if (!response.Success) return BadRequest(response);
+            if (!response.Success)
+            {
+                _logger.LogWarning("Quick login failed. DeviceId={DeviceId}, Error={Error}", request.DeviceId, response.Error);
+                return BadRequest(response);
+            }
+
+            _logger.LogInformation("Quick login succeeded. DeviceId={DeviceId}, UserId={UserId}", request.DeviceId, response.UserId);
             return Ok(response);
+        }
+
+        private async Task<DeviceLoginRequest> ParseDeviceLoginRequestAsync()
+        {
+            var request = new DeviceLoginRequest();
+            if (Request.Body == null || !Request.Body.CanRead)
+            {
+                _logger.LogWarning("Quick login request body is missing or unreadable.");
+                return request;
+            }
+
+            Request.EnableBuffering();
+            using var reader = new StreamReader(Request.Body, leaveOpen: true);
+            var bodyText = await reader.ReadToEndAsync();
+            if (Request.Body.CanSeek)
+            {
+                Request.Body.Position = 0;
+            }
+
+            _logger.LogInformation("Quick login raw request body: {Body}", bodyText);
+
+            if (string.IsNullOrWhiteSpace(bodyText))
+            {
+                _logger.LogWarning("Quick login request body is empty.");
+                return request;
+            }
+
+            try
+            {
+                using var document = JsonDocument.Parse(bodyText);
+                var payload = document.RootElement;
+                if (payload.ValueKind != JsonValueKind.Object)
+                {
+                    return request;
+                }
+
+                if (payload.TryGetProperty("deviceId", out var deviceIdProp))
+                {
+                    request.DeviceId = deviceIdProp.GetString() ?? string.Empty;
+                }
+                else if (payload.TryGetProperty("DeviceId", out var deviceIdPropPascal))
+                {
+                    request.DeviceId = deviceIdPropPascal.GetString() ?? string.Empty;
+                }
+
+                if (payload.TryGetProperty("deviceName", out var deviceNameProp))
+                {
+                    request.DeviceName = deviceNameProp.GetString();
+                }
+                else if (payload.TryGetProperty("DeviceName", out var deviceNamePropPascal))
+                {
+                    request.DeviceName = deviceNamePropPascal.GetString();
+                }
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Quick login request body could not be parsed as JSON. Body={Body}", bodyText);
+                request.DeviceId = string.Empty;
+                request.DeviceName = null;
+            }
+
+            return request;
         }
 
         [HttpPost("login")]

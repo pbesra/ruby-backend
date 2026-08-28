@@ -8,6 +8,8 @@ namespace ruby.application.Ports.In.IServices
     {
         Task<AuthenticationResponse> UpdateProfileAsync(UpdateProfileRequest request);
 
+        Task<UserProfileResponse> GetProfileAsync(Guid userId, Guid currentUserId);
+
         Task<ProfileRatingResponse> AddRatingAsync(RateProfileRequest request);
     }
 }

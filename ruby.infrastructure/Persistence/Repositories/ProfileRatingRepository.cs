@@ -15,6 +15,13 @@ namespace ruby.infrastructure.Persistence.Repositories
             _database = database;
         }
 
+        public async Task<ProfileRating?> GetByProfileIdAsync(Guid profileId)
+        {
+            using var conn = await _database.GetConnection();
+            var sql = @"SELECT * FROM public.profileratings WHERE profileid = @ProfileId LIMIT 1";
+            return await conn.QueryFirstOrDefaultAsync<ProfileRating>(sql, new { ProfileId = profileId });
+        }
+
         public async Task<ProfileRating?> AddRatingAsync(Guid profileId, Guid ratedByUserId, double newRating)
         {
             using var conn = await _database.GetConnection();

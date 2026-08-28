@@ -8,6 +8,7 @@ namespace ruby.domain.Models.Responses
         // Optional error message when Success is false
         public string? Error { get; set; }
         public Guid? UserId { get; set; }
+        public Guid? ProfileId { get; set; }
         public string? DisplayName { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

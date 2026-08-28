@@ -29,6 +29,8 @@ namespace ruby.domain.Entities
         // Foreign keys / references
         public Guid? UserStatusId { get; set; }
         public UserStatus? UserStatus { get; set; }
+        public Guid? AccountStatusId { get; set; }
+        public AccountStatus? AccountStatus { get; set; }
         public Guid? UserRoleId { get; set; }
         public UserRole? UserRole { get; set; }
     }

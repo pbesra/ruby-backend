@@ -14,6 +14,8 @@ namespace ruby.application.Ports.Out.Persistence.IRepositories
 
         Task<IEnumerable<User>> GetByStatusAsync(Guid statusId);
 
+        Task<string?> GetAccountStatusNameAsync(Guid? accountStatusId);
+
         Task CreateAsync(User user);
 
         Task UpdateAsync(User user);

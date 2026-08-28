@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ruby-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ruby
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aws-secrets-manager-ruby-db-password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: ruby.api/Dockerfile
+    container_name: ruby-backend
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Local
+      ASPNETCORE_URLS: http://+:8000
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=ruby;Username=postgres;Password=${DB_PASSWORD:-aws-secrets-manager-ruby-db-password};
+      DatabaseConnection__Host: postgres
+      DatabaseConnection__Port: 5432
+      DatabaseConnection__Database: ruby
+      DatabaseConnection__Username: postgres
+      DatabaseConnection__Password: ${DB_PASSWORD:-aws-secrets-manager-ruby-db-password}
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:

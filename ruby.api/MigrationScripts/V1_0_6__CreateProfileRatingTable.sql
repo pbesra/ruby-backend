@@ -26,7 +26,7 @@ BEGIN
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profileratings_updatedby') THEN
-    EXECUTE 'ALTER TABLE public.profileratings ADD CONSTRAINT fk_profileratings_updatedby FOREIGN KEY (updatedby) REFERENCES public.users(id) ON DELETE SET NULL';
+    EXECUTE 'ALTER TABLE public.profileratings ADD CONSTRAINT fk_profileratings_updatedby FOREIGN KEY (updatedby) REFERENCES public.useraccount(id) ON DELETE SET NULL';
   END IF;
 END;
 $$;

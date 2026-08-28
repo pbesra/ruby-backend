@@ -5,6 +5,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using ruby.application.Ports.In.IServices;
 using ruby.domain.Models.Requests;
 using ruby.domain.Models.Responses;
@@ -23,6 +25,7 @@ namespace ruby.application.Services
         private readonly IPhoneVerificationService _phoneVerificationService;
         private readonly IProfileRepository _profileRepository;
         private readonly IGoogleTokenValidator _googleTokenValidator;
+        private readonly ILogger<AuthenticationService> _logger;
 
         public AuthenticationService(
             IUserRepository userRepository, 
@@ -31,7 +34,8 @@ namespace ruby.application.Services
             IJwtTokenService jwtTokenService, 
             IPhoneVerificationService phoneVerificationService, 
             IProfileRepository profileRepository,
-            IGoogleTokenValidator googleTokenValidator)
+            IGoogleTokenValidator googleTokenValidator,
+            ILogger<AuthenticationService>? logger = null)
         {
             _userRepository = userRepository;
             _refreshTokenRepository = refreshTokenRepository;
@@ -40,14 +44,20 @@ namespace ruby.application.Services
             _phoneVerificationService = phoneVerificationService;
             _profileRepository = profileRepository;
             _googleTokenValidator = googleTokenValidator;
+            _logger = logger ?? NullLogger<AuthenticationService>.Instance;
         }
 
         public async Task<RegisterResponse> RegisterAsync(RegisterRequest req)
         {
+            _logger.LogInformation("RegisterAsync started for email={Email}", req.Email);
+
             // simple uniqueness check by email
             var existing = await _userRepository.GetByEmailAsync(req.Email);
             if (existing != null)
+            {
+                _logger.LogWarning("RegisterAsync rejected duplicate email={Email}", req.Email);
                 throw new ApplicationException("User with the same email already exists");
+            }
 
             var now = DateTimeOffset.UtcNow;
             // Use Mapperly-generated mapper to map request -> entity for common properties
@@ -71,6 +81,8 @@ namespace ruby.application.Services
 
         public async Task<AuthenticationResponse> LoginAsync(LoginRequest loginRequest)
         {
+            _logger.LogInformation("LoginAsync started. Identifier={Identifier}, DeviceId={DeviceId}", loginRequest.Identifier, loginRequest.DeviceId);
+
             User? user = null;
             var usernameOrEmailOrPhone = loginRequest.Identifier;
             if (!string.IsNullOrWhiteSpace(usernameOrEmailOrPhone))
@@ -80,10 +92,16 @@ namespace ruby.application.Services
             }
 
             if (user == null)
+            {
+                _logger.LogWarning("LoginAsync failed: invalid identifier={Identifier}", usernameOrEmailOrPhone);
                 return new AuthenticationResponse { Success = false, Error = "Invalid credentials" };
+            }
 
             if (!_passwordHasher.Verify(loginRequest.Password, user.PasswordHash))
+            {
+                _logger.LogWarning("LoginAsync failed: invalid password for userId={UserId}", user.Id);
                 return new AuthenticationResponse { Success = false, Error = "Invalid credentials" };
+            }
 
             // update last login
             user.LastLoginAt = DateTimeOffset.UtcNow;
@@ -273,8 +291,13 @@ namespace ruby.application.Services
 
         public async Task<AuthenticationResponse> LoginWithDeviceAsync(ruby.domain.Models.Requests.DeviceLoginRequest request)
         {
+            _logger.LogInformation("LoginWithDeviceAsync started. DeviceId={DeviceId}, DeviceName={DeviceName}", request.DeviceId, request.DeviceName);
+
             if (string.IsNullOrWhiteSpace(request.DeviceId))
+            {
+                _logger.LogWarning("LoginWithDeviceAsync failed: DeviceId missing.");
                 return new AuthenticationResponse { Success = false, Error = "DeviceId is required" };
+            }
 
             var deviceKey = "device:" + request.DeviceId;
             var fakeName = GenerateQuickLoginName(request.DeviceId);
@@ -402,6 +425,8 @@ namespace ruby.application.Services
 
         private async Task<AuthenticationResponse> GenerateAndStoreTokensAsync(Guid userId, string? deviceId = null)
         {
+            _logger.LogInformation("GenerateAndStoreTokensAsync started. UserId={UserId}, DeviceId={DeviceId}", userId, deviceId);
+
             var profile = await _profileRepository.GetByUserIdAsync(userId);
             var accessToken = _jwtTokenService.GenerateAccessToken(userId, profile?.FirstName, profile?.LastName);
             var refreshToken = Guid.NewGuid().ToString("N");
@@ -420,9 +445,12 @@ namespace ruby.application.Services
 
             await _refreshTokenRepository.CreateAsync(rt);
 
+            _logger.LogInformation("Tokens generated for userId={UserId}. RefreshTokenCreated={Created}", userId, rt.Id != Guid.Empty);
+
             return new AuthenticationResponse
             {
                 UserId = userId,
+                ProfileId = profile != null && profile.Id != Guid.Empty ? profile.Id : null,
                 DisplayName = profile?.DisplayName,
                 FirstName = profile?.FirstName,
                 LastName = profile?.LastName,

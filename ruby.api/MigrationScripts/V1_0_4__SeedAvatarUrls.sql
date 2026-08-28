@@ -10,7 +10,7 @@ SELECT
     false,
     now(),
     now()
-FROM public.users u
+FROM public.useraccount u
 LEFT JOIN public.profiles p ON p.userid = u.id
 WHERE p.userid IS NULL;
 

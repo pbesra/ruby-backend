@@ -27,7 +27,7 @@ BEGIN
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_profileratingvotes_ratedby') THEN
-    EXECUTE 'ALTER TABLE public.profileratingvotes ADD CONSTRAINT fk_profileratingvotes_ratedby FOREIGN KEY (ratedbyuserid) REFERENCES public.users(id) ON DELETE CASCADE';
+    EXECUTE 'ALTER TABLE public.profileratingvotes ADD CONSTRAINT fk_profileratingvotes_ratedby FOREIGN KEY (ratedbyuserid) REFERENCES public.useraccount(id) ON DELETE CASCADE';
   END IF;
 END;
 $$;
